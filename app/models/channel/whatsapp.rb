@@ -98,7 +98,7 @@ class Channel::Whatsapp < ApplicationRecord
   end
 
   def teardown_webhooks
-    return if provider == 'quepasa'
+    return provider_service.teardown_webhooks if provider == 'quepasa'
 
     Whatsapp::WebhookTeardownService.new(self).perform
   end

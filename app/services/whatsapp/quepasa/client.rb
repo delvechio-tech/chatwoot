@@ -79,6 +79,17 @@ class Whatsapp::Quepasa::Client
     raise "Quepasa set webhook failed [#{response.code}]: #{response.body}" unless response.success?
   end
 
+  def delete_bot!
+    response = HTTParty.delete("#{base_url}/info", headers: bot_headers)
+    return true if response.success? || [404, 410].include?(response.code)
+
+    raise "Quepasa delete bot failed [#{response.code}]: #{response.body}"
+  end
+
+  def delete_webhook!(url)
+    HTTParty.delete("#{base_url}/webhook", headers: bot_headers, body: { url: url }.to_json)
+  end
+
   def update_settings!(settings)
     HTTParty.patch("#{base_url}/info", headers: bot_headers, body: { settings: settings }.to_json)
     response = post_info(settings, bot_headers)
@@ -174,10 +185,6 @@ class Whatsapp::Quepasa::Client
     return [] unless response.success?
 
     parsed_body(response)['webhooks'] || []
-  end
-
-  def delete_webhook!(url)
-    HTTParty.delete("#{base_url}/webhook", headers: bot_headers, body: { url: url }.to_json)
   end
 
   def health

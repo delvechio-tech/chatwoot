@@ -46,6 +46,24 @@ class Whatsapp::Providers::QuepasaService < Whatsapp::Providers::BaseService
     whatsapp_channel.reauthorized!
   end
 
+  def teardown_webhooks
+    teardown_errors = []
+
+    begin
+      client.delete_webhook!(webhook_url)
+    rescue StandardError => e
+      teardown_errors << "webhook: #{e.message}"
+    end
+
+    begin
+      client.delete_bot!
+    rescue StandardError => e
+      teardown_errors << "bot: #{e.message}"
+    end
+
+    Rails.logger.warn("[Quepasa] Teardown failed for channel #{whatsapp_channel.id}: #{teardown_errors.join(' | ')}") if teardown_errors.present?
+  end
+
   def qr_code
     client.ensure_bot!(settings_payload)
     qr = client.scan
