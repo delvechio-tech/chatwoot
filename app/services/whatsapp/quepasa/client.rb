@@ -107,6 +107,18 @@ class Whatsapp::Quepasa::Client
     parsed
   end
 
+  def chat_presence!(chat_id:, type:, duration: nil)
+    body = {
+      chatid: chat_id,
+      type: type,
+      duration: duration
+    }.compact
+    response = HTTParty.post("#{base_url}/chat/presence", headers: bot_headers, body: body.to_json)
+    raise "Quepasa chat presence failed [#{response.code}]: #{response.body}" unless response.success?
+
+    parsed_body(response)
+  end
+
   def contact_name(chat_id, phone = nil)
     user_info(chat_id, phone).filter_map do |info|
       info['pushName'] || info['PushName'] || info['displayName'] || info['DisplayName'] || info['name'] || info['title']

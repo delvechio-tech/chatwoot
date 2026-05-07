@@ -1,4 +1,8 @@
 class Whatsapp::Providers::QuepasaService < Whatsapp::Providers::BaseService
+  PRESENCE_PAUSED = 0
+  PRESENCE_TEXT = 1
+  PRESENCE_TEXT_DURATION_MS = 5000
+
   DEFAULT_SETTINGS = {
     broadcasts: false,
     calls: false,
@@ -96,6 +100,18 @@ class Whatsapp::Providers::QuepasaService < Whatsapp::Providers::BaseService
 
   def set_running(value)
     client.set_running(value)
+  end
+
+  def send_typing_status(chat_id, status)
+    return if chat_id.blank?
+
+    if status == 'on'
+      client.chat_presence!(chat_id: chat_id, type: PRESENCE_TEXT, duration: PRESENCE_TEXT_DURATION_MS)
+    elsif status == 'off'
+      client.chat_presence!(chat_id: chat_id, type: PRESENCE_PAUSED)
+    end
+  rescue StandardError => e
+    Rails.logger.warn("[Quepasa] Failed to send typing presence for channel #{whatsapp_channel.id}: #{e.message}")
   end
 
   def settings
