@@ -45,7 +45,7 @@ export default {
           },
         });
       } catch (error) {
-        useAlert(error.message || 'Nao foi possivel criar a caixa WhatsApp API');
+        useAlert(error.message || 'Não foi possível criar a caixa WhatsApp API');
       }
     },
   },
@@ -70,7 +70,7 @@ export default {
     </div>
 
     <p class="max-w-xl mb-4 text-sm leading-relaxed text-n-slate-11">
-      Finalize a criacao da caixa e conecte seu numero nas configuracoes.
+      Finalize a criação da caixa e conecte seu número nas configurações.
     </p>
 
     <div class="w-full mt-4">

@@ -8,10 +8,10 @@ import SpinnerLoader from 'dashboard/components-next/spinner/Spinner.vue';
 
 const FIELD_CONFIG = [
   ['groups', 'Grupos', 'Receber mensagens de grupos'],
-  ['broadcasts', 'Broadcasts', 'Receber listas de transmissao'],
+  ['broadcasts', 'Broadcasts', 'Receber listas de transmissão'],
   ['direct', 'Mensagens diretas', 'Conversas individuais'],
   ['calls', 'Chamadas', 'Receber eventos de chamada'],
-  ['readreceipts', 'Confirmacoes de leitura', 'Receber eventos de leitura'],
+  ['readreceipts', 'Confirmações de leitura', 'Receber eventos de leitura'],
   ['readupdate', 'Marcar como lida ao receber', 'Atualizar leitura automaticamente'],
 ];
 
@@ -36,12 +36,30 @@ export default {
       connected: false,
       isLoading: false,
       isSaving: false,
+      isHydrating: false,
       isRefreshingQr: false,
+      saveTimer: null,
+      connectionTimer: null,
       fields: FIELD_CONFIG,
     };
   },
   mounted() {
     this.fetchSettings();
+  },
+  beforeUnmount() {
+    this.stopConnectionPolling();
+    if (this.saveTimer) clearTimeout(this.saveTimer);
+  },
+  watch: {
+    running() {
+      this.queueAutoSave();
+    },
+    settings: {
+      deep: true,
+      handler() {
+        this.queueAutoSave();
+      },
+    },
   },
   methods: {
     errorMessage(error, fallback) {
@@ -54,22 +72,19 @@ export default {
     },
     async fetchSettings() {
       this.isLoading = true;
+      this.isHydrating = true;
       try {
         const response = await InboxesAPI.getQuepasaSettings(this.inbox.id);
-        this.settings = response.data.settings || {};
-        this.updateConnectionState(response.data);
-        this.running =
-          typeof response.data.running === 'boolean'
-            ? response.data.running
-            : true;
+        this.applyQuepasaState(response.data, { replaceSettings: true });
       } catch (error) {
         useAlert(
           this.errorMessage(
             error,
-            'Nao foi possivel carregar as configuracoes do WhatsApp API'
+            'Não foi possível carregar as configurações do WhatsApp API'
           )
         );
       } finally {
+        this.isHydrating = false;
         this.isLoading = false;
       }
     },
@@ -77,18 +92,25 @@ export default {
       this.isRefreshingQr = true;
       try {
         const response = await InboxesAPI.getQuepasaQRCode(this.inbox.id);
-        this.updateConnectionState(response.data);
+        this.applyQuepasaState(response.data);
         this.qrCode = this.connected ? '' : response.data.qr_code;
-        this.settings = response.data.settings || this.settings;
-        this.running =
-          typeof response.data.running === 'boolean'
-            ? response.data.running
-            : this.running;
+        if (this.connected) {
+          useAlert('WhatsApp conectado com sucesso');
+          this.stopConnectionPolling();
+        } else {
+          this.startConnectionPolling();
+        }
       } catch (error) {
-        useAlert(this.errorMessage(error, 'Nao foi possivel gerar o QR Code'));
+        useAlert(this.errorMessage(error, 'Não foi possível gerar o QR Code'));
       } finally {
         this.isRefreshingQr = false;
       }
+    },
+    queueAutoSave() {
+      if (this.isHydrating || this.isLoading) return;
+
+      if (this.saveTimer) clearTimeout(this.saveTimer);
+      this.saveTimer = setTimeout(() => this.saveSettings({ silent: true }), 250);
     },
     async saveSettings() {
       this.isSaving = true;
@@ -97,19 +119,52 @@ export default {
           running: this.running,
           settings: this.settings,
         });
-        this.settings = response.data.settings || this.settings;
-        this.updateConnectionState(response.data);
-        this.running =
-          typeof response.data.running === 'boolean'
-            ? response.data.running
-            : this.running;
-        useAlert('Configuracoes do WhatsApp API atualizadas');
+        this.applyQuepasaState(response.data);
       } catch (error) {
         useAlert(
-          this.errorMessage(error, 'Nao foi possivel salvar as configuracoes')
+          this.errorMessage(error, 'Não foi possível salvar as configurações')
         );
+        this.fetchSettings();
       } finally {
         this.isSaving = false;
+      }
+    },
+    applyQuepasaState(data = {}, { replaceSettings = false } = {}) {
+      this.isHydrating = true;
+      if (replaceSettings || data.settings) {
+        this.settings = data.settings || this.settings || {};
+      }
+      this.updateConnectionState(data);
+      this.running =
+        typeof data.running === 'boolean' ? data.running : this.running;
+      if (this.connected) {
+        this.qrCode = '';
+        this.stopConnectionPolling();
+      }
+      this.$nextTick(() => {
+        this.isHydrating = false;
+      });
+    },
+    startConnectionPolling() {
+      this.stopConnectionPolling();
+      this.connectionTimer = setInterval(this.refreshConnectionState, 5000);
+    },
+    stopConnectionPolling() {
+      if (!this.connectionTimer) return;
+
+      clearInterval(this.connectionTimer);
+      this.connectionTimer = null;
+    },
+    async refreshConnectionState() {
+      try {
+        const response = await InboxesAPI.getQuepasaSettings(this.inbox.id);
+        const wasConnected = this.connected;
+        this.applyQuepasaState(response.data);
+        if (!wasConnected && this.connected) {
+          useAlert('WhatsApp conectado com sucesso');
+        }
+      } catch {
+        // Keep the QR visible and try again on the next polling tick.
       }
     },
     updateConnectionState(data = {}) {
@@ -136,10 +191,10 @@ export default {
 
     <template v-else>
       <SettingsFieldSection
-        label="Conexao WhatsApp"
+        label="Conexão WhatsApp"
         :help-text="
           connected
-            ? 'Numero conectado e pronto para receber mensagens.'
+            ? 'Número conectado e pronto para receber mensagens.'
             : 'Gere o QR Code e leia pelo WhatsApp em Aparelhos conectados.'
         "
       >
@@ -153,7 +208,7 @@ export default {
                 Conectado com sucesso
               </p>
               <p class="text-sm text-n-slate-11">
-                A sessao esta ativa para enviar e receber mensagens.
+                A sessão está ativa para enviar e receber mensagens.
               </p>
             </div>
           </div>
@@ -204,12 +259,10 @@ export default {
         :description="description"
       />
 
-      <div class="flex justify-end">
-        <NextButton
-          :is-loading="isSaving"
-          label="Salvar configuracoes"
-          @click="saveSettings"
-        />
+      <div class="flex justify-end min-h-5">
+        <span v-if="isSaving" class="text-sm text-n-slate-11">
+          Salvando configurações...
+        </span>
       </div>
     </template>
   </div>
