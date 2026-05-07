@@ -1,0 +1,188 @@
+version: "3.7"
+
+# Chatwoot + Quepasa stack example for Portainer/Swarm.
+# Replace every CHANGE_ME value before deploying.
+# Required external resources:
+#   docker network create --driver overlay --attachable CHANGE_ME_NETWORK
+#   docker volume create chatwoot_storage
+#   docker volume create chatwoot_public
+#   docker volume create chatwoot_mailer
+#   docker volume create chatwoot_mailers
+#   docker volume create chatwoot_redis
+#   docker volume create pg_data
+
+services:
+  pgvector:
+    image: ankane/pgvector:latest
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - chatwoot_network
+    environment:
+      - POSTGRES_DB=chatwoot
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=CHANGE_ME_POSTGRES_PASSWORD
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
+
+  chatwoot_redis:
+    image: redis:latest
+    command: ["redis-server", "--appendonly", "yes", "--port", "6379"]
+    volumes:
+      - chatwoot_redis:/data
+    networks:
+      - chatwoot_network
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
+
+  chatwoot_app:
+    image: delvechiotech/chatwoot-quepasa:latest
+    entrypoint: docker/entrypoints/rails.sh
+    command: >
+      sh -c "echo 'Rails.application.config.active_storage.variant_processor = :mini_magick' > /app/config/initializers/active_storage.rb &&
+      bundle exec rails db:chatwoot_prepare &&
+      bundle exec rails s -p 3000 -b 0.0.0.0"
+    volumes:
+      - chatwoot_storage:/app/storage
+      - chatwoot_public:/app/public
+      - chatwoot_mailer:/app/app/views/devise/mailer
+      - chatwoot_mailers:/app/app/views/mailers
+    networks:
+      - chatwoot_network
+    environment:
+      - INSTALLATION_NAME=CHANGE_ME_INSTALLATION_NAME
+      - CHATWOOT_EDITION=enterprise
+      - CW_ENABLE_ENTERPRISE=true
+      - INSTALLATION_PRICING_PLAN=enterprise
+      - DISABLE_TELEMETRY=true
+      - CW_CAPTAIN_ENABLED=true
+      - FRONTEND_URL=https://CHANGE_ME_CHATWOOT_DOMAIN
+      - FORCE_SSL=true
+      - SECRET_KEY_BASE=CHANGE_ME_SECRET_KEY_BASE_64_CHARS
+      - DEFAULT_LOCALE=pt_BR
+      - TZ=America/Sao_Paulo
+      - REDIS_URL=redis://chatwoot_redis:6379
+      - POSTGRES_HOST=pgvector
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=CHANGE_ME_POSTGRES_PASSWORD
+      - POSTGRES_DATABASE=chatwoot
+      - POSTGRES_PORT=5432
+      - ACTIVE_STORAGE_SERVICE=local
+      - RAILS_LOG_TO_STDOUT=true
+      - NODE_ENV=production
+      - RAILS_ENV=production
+      - INSTALLATION_ENV=docker
+
+      # SMTP
+      - MAILER_SENDER_EMAIL=CHANGE_ME_EMAIL
+      - SMTP_DOMAIN=CHANGE_ME_SMTP_DOMAIN
+      - SMTP_ADDRESS=CHANGE_ME_SMTP_HOST
+      - SMTP_PORT=587
+      - SMTP_SSL=false
+      - SMTP_USERNAME=CHANGE_ME_SMTP_USER
+      - SMTP_PASSWORD=CHANGE_ME_SMTP_PASSWORD
+      - SMTP_AUTHENTICATION=login
+      - SMTP_ENABLE_STARTTLS_AUTO=true
+      - SMTP_OPENSSL_VERIFY_MODE=peer
+
+      # Quepasa
+      - QUEPASA_API_URL=https://CHANGE_ME_QUEPASA_DOMAIN
+      - QUEPASA_MASTER_KEY=CHANGE_ME_QUEPASA_MASTER_KEY
+      # Optional. If omitted, Chatwoot uses QUEPASA_MASTER_KEY as password.
+      # - QUEPASA_USER=chatwoot
+      # - QUEPASA_PASSWORD=CHANGE_ME_QUEPASA_PASSWORD
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.chatwoot_app.rule=Host(`CHANGE_ME_CHATWOOT_DOMAIN`)
+        - traefik.http.routers.chatwoot_app.entrypoints=websecure
+        - traefik.http.routers.chatwoot_app.tls.certresolver=letsencryptresolver
+        - traefik.http.services.chatwoot_app.loadbalancer.server.port=3000
+
+  chatwoot_sidekiq:
+    image: delvechiotech/chatwoot-quepasa:latest
+    command: bundle exec sidekiq -C config/sidekiq.yml
+    volumes:
+      - chatwoot_storage:/app/storage
+      - chatwoot_public:/app/public
+      - chatwoot_mailer:/app/app/views/devise/mailer
+      - chatwoot_mailers:/app/app/views/mailers
+    networks:
+      - chatwoot_network
+    environment:
+      - INSTALLATION_NAME=CHANGE_ME_INSTALLATION_NAME
+      - SECRET_KEY_BASE=CHANGE_ME_SECRET_KEY_BASE_64_CHARS
+      - FRONTEND_URL=https://CHANGE_ME_CHATWOOT_DOMAIN
+      - FORCE_SSL=true
+      - REDIS_URL=redis://chatwoot_redis:6379
+      - POSTGRES_HOST=pgvector
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=CHANGE_ME_POSTGRES_PASSWORD
+      - POSTGRES_DATABASE=chatwoot
+      - POSTGRES_PORT=5432
+      - ACTIVE_STORAGE_SERVICE=local
+      - RAILS_LOG_TO_STDOUT=true
+      - NODE_ENV=production
+      - RAILS_ENV=production
+      - INSTALLATION_ENV=docker
+
+      # SMTP
+      - MAILER_SENDER_EMAIL=CHANGE_ME_EMAIL
+      - SMTP_DOMAIN=CHANGE_ME_SMTP_DOMAIN
+      - SMTP_ADDRESS=CHANGE_ME_SMTP_HOST
+      - SMTP_PORT=587
+      - SMTP_SSL=false
+      - SMTP_USERNAME=CHANGE_ME_SMTP_USER
+      - SMTP_PASSWORD=CHANGE_ME_SMTP_PASSWORD
+      - SMTP_AUTHENTICATION=login
+      - SMTP_ENABLE_STARTTLS_AUTO=true
+      - SMTP_OPENSSL_VERIFY_MODE=peer
+
+      # Quepasa
+      - QUEPASA_API_URL=https://CHANGE_ME_QUEPASA_DOMAIN
+      - QUEPASA_MASTER_KEY=CHANGE_ME_QUEPASA_MASTER_KEY
+      # Optional. If omitted, Chatwoot uses QUEPASA_MASTER_KEY as password.
+      # - QUEPASA_USER=chatwoot
+      # - QUEPASA_PASSWORD=CHANGE_ME_QUEPASA_PASSWORD
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
+volumes:
+  chatwoot_storage:
+    external: true
+  chatwoot_public:
+    external: true
+  chatwoot_mailer:
+    external: true
+  chatwoot_mailers:
+    external: true
+  chatwoot_redis:
+    external: true
+  pg_data:
+    external: true
+
+networks:
+  chatwoot_network:
+    name: CHANGE_ME_NETWORK
+    external: true
