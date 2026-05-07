@@ -114,6 +114,30 @@ class Whatsapp::Providers::QuepasaService < Whatsapp::Providers::BaseService
     Rails.logger.warn("[Quepasa] Failed to send typing presence for channel #{whatsapp_channel.id}: #{e.message}")
   end
 
+  def mark_chat_read(chat_id)
+    return if chat_id.blank?
+
+    client.mark_chat_read!(chat_id)
+  rescue StandardError => e
+    Rails.logger.warn("[Quepasa] Failed to mark chat read for channel #{whatsapp_channel.id}: #{e.message}")
+  end
+
+  def mark_chat_unread(chat_id)
+    return if chat_id.blank?
+
+    client.mark_chat_unread!(chat_id)
+  rescue StandardError => e
+    Rails.logger.warn("[Quepasa] Failed to mark chat unread for channel #{whatsapp_channel.id}: #{e.message}")
+  end
+
+  def archive_chat(chat_id, archive:)
+    return if chat_id.blank?
+
+    client.archive_chat!(chat_id, archive: archive)
+  rescue StandardError => e
+    Rails.logger.warn("[Quepasa] Failed to update chat archive for channel #{whatsapp_channel.id}: #{e.message}")
+  end
+
   def settings
     normalize_settings(info['server'] || info)
   end

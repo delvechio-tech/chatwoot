@@ -119,6 +119,27 @@ class Whatsapp::Quepasa::Client
     parsed_body(response)
   end
 
+  def mark_chat_read!(chat_id)
+    response = HTTParty.post("#{base_url}/chat/markread", headers: bot_headers, body: { chatid: chat_id }.to_json)
+    raise "Quepasa mark chat read failed [#{response.code}]: #{response.body}" unless response.success?
+
+    parsed_body(response)
+  end
+
+  def mark_chat_unread!(chat_id)
+    response = HTTParty.post("#{base_url}/chat/markunread", headers: bot_headers, body: { chatid: chat_id }.to_json)
+    raise "Quepasa mark chat unread failed [#{response.code}]: #{response.body}" unless response.success?
+
+    parsed_body(response)
+  end
+
+  def archive_chat!(chat_id, archive:)
+    response = HTTParty.post("#{base_url}/chat/archive", headers: bot_headers, body: { chatid: chat_id, archive: archive }.to_json)
+    raise "Quepasa archive chat failed [#{response.code}]: #{response.body}" unless response.success?
+
+    parsed_body(response)
+  end
+
   def contact_name(chat_id, phone = nil)
     user_info(chat_id, phone).filter_map do |info|
       info['pushName'] || info['PushName'] || info['displayName'] || info['DisplayName'] || info['name'] || info['title']

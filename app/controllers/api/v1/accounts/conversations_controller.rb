@@ -80,6 +80,7 @@ class Api::V1::Accounts::ConversationsController < Api::V1::Accounts::BaseContro
 
   def toggle_status
     # FIXME: move this logic into a service object
+    previous_status = @conversation.status
     if pending_to_open_by_bot?
       @conversation.bot_handoff!
     elsif params[:status].present?
@@ -89,6 +90,7 @@ class Api::V1::Accounts::ConversationsController < Api::V1::Accounts::BaseContro
       @status = @conversation.toggle_status
     end
     assign_conversation if should_assign_conversation?
+    sync_quepasa_chat_archive(previous_status)
   end
 
   def pending_to_open_by_bot?
@@ -118,6 +120,7 @@ class Api::V1::Accounts::ConversationsController < Api::V1::Accounts::BaseContro
     # Always update immediately if there are unread messages to maintain accurate read/unread state.
     # Visiting a conversation should clear any unread inbox notifications for this conversation.
     Notification::MarkConversationReadService.new(user: Current.user, account: Current.account, conversation: @conversation).perform
+    sync_quepasa_chat_read
     return update_last_seen_on_conversation(DateTime.now.utc, true) if assignee? && @conversation.assignee_unread_messages.any?
     return update_last_seen_on_conversation(DateTime.now.utc, false) if !assignee? && @conversation.unread_messages.any?
 
@@ -131,6 +134,7 @@ class Api::V1::Accounts::ConversationsController < Api::V1::Accounts::BaseContro
     last_incoming_message = @conversation.messages.incoming.last
     last_seen_at = last_incoming_message.created_at - 1.second if last_incoming_message.present?
     update_last_seen_on_conversation(last_seen_at, true)
+    sync_quepasa_chat_unread
   end
 
   def custom_attributes
@@ -183,6 +187,29 @@ class Api::V1::Accounts::ConversationsController < Api::V1::Accounts::BaseContro
   def assign_conversation
     @conversation.assignee = current_user
     @conversation.save!
+  end
+
+  def sync_quepasa_chat_read
+    quepasa_provider_service&.mark_chat_read(@conversation.contact_inbox&.source_id)
+  end
+
+  def sync_quepasa_chat_unread
+    quepasa_provider_service&.mark_chat_unread(@conversation.contact_inbox&.source_id)
+  end
+
+  def sync_quepasa_chat_archive(previous_status)
+    return if @conversation.status == previous_status
+
+    quepasa_provider_service&.archive_chat(@conversation.contact_inbox&.source_id, archive: @conversation.resolved?)
+  end
+
+  def quepasa_provider_service
+    return unless @conversation.inbox.channel_type == 'Channel::Whatsapp'
+
+    channel = @conversation.inbox.channel
+    return unless channel.provider == 'quepasa'
+
+    channel.provider_service
   end
 
   def conversation
