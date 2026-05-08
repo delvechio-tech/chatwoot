@@ -70,6 +70,7 @@ class Whatsapp::IncomingMessageQuepasaService
     return true if @message_id.blank? || @chat_jid.blank?
     return true if @broadcast && !setting_enabled?('broadcasts')
     return true if @group && !setting_enabled?('groups')
+    return true if generated_contact_card?
     return true if %w[reaction call system revoke unhandled].include?(@kind)
 
     false
@@ -229,8 +230,9 @@ class Whatsapp::IncomingMessageQuepasaService
   end
 
   def rendered_content
-    base = heavy_media_notice || @text.presence || @attachment&.dig(:name).presence || media_label
+    base = heavy_media_notice || user_text.presence
     return base unless @group && participant_label.present? && !@from_me
+    return if base.blank?
 
     "*#{participant_label}:*\n#{base}"
   end
@@ -326,6 +328,39 @@ class Whatsapp::IncomingMessageQuepasaService
     return 'Figurinha' if mime.include?('sticker') || @kind == 'sticker'
 
     'Arquivo'
+  end
+
+  def user_text
+    return @text if @attachment.blank?
+    return if generic_media_text?
+
+    @text
+  end
+
+  def generic_media_text?
+    normalized_text = I18n.transliterate(@text.to_s.strip.downcase)
+    return true if normalized_text.blank?
+
+    generic_labels = [
+      media_label,
+      @kind,
+      @attachment&.dig(:mime).to_s.split('/').first,
+      @attachment&.dig(:mime).to_s.split('/').last.to_s.split(';').first
+    ].compact.map { |value| I18n.transliterate(value.to_s.strip.downcase) }
+    generic_labels += %w[foto imagem image video audio file arquivo document documento pdf sticker figurinha]
+    generic_labels.uniq.include?(normalized_text)
+  end
+
+  def generated_contact_card?
+    return false unless vcard_attachment?
+
+    @text.to_s.match?(/\A\[C2S\]/i)
+  end
+
+  def vcard_attachment?
+    name = @attachment&.dig(:name).to_s.downcase
+    mime = @attachment&.dig(:mime).to_s.downcase
+    name.end_with?('.vcf') || mime.include?('vcard') || mime.include?('text/x-vcard')
   end
 
   def classify_kind

@@ -247,9 +247,10 @@ class Whatsapp::Providers::QuepasaService < Whatsapp::Providers::BaseService
 
   def send_attachment_message(chat_id, message)
     attachment = message.attachments.first
+    clear_generic_attachment_content!(message, attachment)
     response = client.send_message(
       chatId: chat_id,
-      text: message.outgoing_content,
+      text: attachment_caption(message, attachment),
       url: attachment.download_url,
       fileName: attachment.file.filename.to_s,
       mime: attachment.file.blob.content_type,
@@ -263,5 +264,41 @@ class Whatsapp::Providers::QuepasaService < Whatsapp::Providers::BaseService
 
     message.update!(status: :failed, external_error: response&.dig('error').presence || 'Quepasa send failed') if message.present?
     nil
+  end
+
+  def attachment_caption(message, attachment)
+    content = message.outgoing_content.to_s.strip
+    return if generic_attachment_content?(content, attachment)
+
+    content.presence
+  end
+
+  def clear_generic_attachment_content!(message, attachment)
+    return unless generic_attachment_content?(message.content.to_s.strip, attachment)
+
+    message.update!(content: nil)
+  end
+
+  def generic_attachment_content?(content, attachment)
+    return false if content.blank? || attachment.blank?
+
+    mime = attachment.file.blob.content_type.to_s.downcase
+    labels = [
+      mime.split('/').first,
+      mime.split('/').last.to_s.split(';').first,
+      attachment.file_type,
+      'foto',
+      'imagem',
+      'image',
+      'video',
+      'audio',
+      'arquivo',
+      'file',
+      'documento',
+      'document',
+      'pdf'
+    ].compact.map { |value| I18n.transliterate(value.to_s.strip.downcase) }
+
+    labels.uniq.include?(I18n.transliterate(content.downcase))
   end
 end

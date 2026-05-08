@@ -278,20 +278,13 @@ export default {
         :description="description"
       />
 
-      <SettingsFieldSection
-        label="Automações do Chatwoot"
-        help-text="Controle como as ações feitas no atendimento refletem no WhatsApp."
-      >
-        <div class="space-y-4">
-          <SettingsToggleSection
-            v-for="[key, label, description] in automationFields"
-            :key="key"
-            v-model="automationSettings[key]"
-            :header="label"
-            :description="description"
-          />
-        </div>
-      </SettingsFieldSection>
+      <SettingsToggleSection
+        v-for="[key, label, description] in automationFields"
+        :key="key"
+        v-model="automationSettings[key]"
+        :header="label"
+        :description="description"
+      />
 
       <div class="flex justify-end min-h-5">
         <span v-if="isSaving" class="text-sm text-n-slate-11">
