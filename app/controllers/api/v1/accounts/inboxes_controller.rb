@@ -73,7 +73,7 @@ class Api::V1::Accounts::InboxesController < Api::V1::Accounts::BaseController
     service = @inbox.channel.provider_service
     qr = service.qr_code
     @inbox.channel.update!(provider_config: @inbox.channel.provider_config.merge('qr_updated_at' => Time.current.iso8601))
-    render json: { qr_code: qr, running: service.running, settings: service.settings, connected: service.connected?, info: service.info }
+    render json: { qr_code: qr, running: service.running, settings: service.settings, automation_settings: service.automation_settings, connected: service.connected?, info: service.info }
   rescue StandardError => e
     Rails.logger.error("[Quepasa] QR failed for inbox #{@inbox&.id}: #{e.message}")
     render json: { error: e.message }, status: :bad_gateway
@@ -84,11 +84,12 @@ class Api::V1::Accounts::InboxesController < Api::V1::Accounts::BaseController
 
     service = @inbox.channel.provider_service
     if request.get?
-      render json: { settings: service.settings, running: service.running, connected: service.connected?, info: service.info }
+      render json: { settings: service.settings, automation_settings: service.automation_settings, running: service.running, connected: service.connected?, info: service.info }
     else
       service.set_running(params[:running]) unless params[:running].nil?
       settings = params[:settings].present? ? service.update_settings!(params[:settings].to_unsafe_h) : service.settings
-      render json: { settings: settings, running: service.running, connected: service.connected?, info: service.info }
+      automation_settings = params[:automation_settings].present? ? service.update_automation_settings!(params[:automation_settings].to_unsafe_h) : service.automation_settings
+      render json: { settings: settings, automation_settings: automation_settings, running: service.running, connected: service.connected?, info: service.info }
     end
   rescue StandardError => e
     Rails.logger.error("[Quepasa] Settings failed for inbox #{@inbox&.id}: #{e.message}")

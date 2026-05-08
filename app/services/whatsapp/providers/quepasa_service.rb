@@ -11,8 +11,14 @@ class Whatsapp::Providers::QuepasaService < Whatsapp::Providers::BaseService
     readreceipts: false,
     readupdate: false
   }.freeze
+  DEFAULT_AUTOMATION_SETTINGS = {
+    typing_presence: true,
+    read_sync: true,
+    archive_sync: true
+  }.freeze
 
   QUEPASA_BOOLEAN_FIELDS = DEFAULT_SETTINGS.keys.freeze
+  AUTOMATION_BOOLEAN_FIELDS = DEFAULT_AUTOMATION_SETTINGS.keys.freeze
 
   def send_message(chat_id, message)
     @message = message
@@ -103,6 +109,7 @@ class Whatsapp::Providers::QuepasaService < Whatsapp::Providers::BaseService
   end
 
   def send_typing_status(chat_id, status)
+    return unless automation_enabled?(:typing_presence)
     return if chat_id.blank?
 
     if status == 'on'
@@ -115,6 +122,7 @@ class Whatsapp::Providers::QuepasaService < Whatsapp::Providers::BaseService
   end
 
   def mark_chat_read(chat_id)
+    return unless automation_enabled?(:read_sync)
     return if chat_id.blank?
 
     client.mark_chat_read!(chat_id)
@@ -123,6 +131,7 @@ class Whatsapp::Providers::QuepasaService < Whatsapp::Providers::BaseService
   end
 
   def mark_chat_unread(chat_id)
+    return unless automation_enabled?(:read_sync)
     return if chat_id.blank?
 
     client.mark_chat_unread!(chat_id)
@@ -131,6 +140,7 @@ class Whatsapp::Providers::QuepasaService < Whatsapp::Providers::BaseService
   end
 
   def archive_chat(chat_id, archive:)
+    return unless automation_enabled?(:archive_sync)
     return if chat_id.blank?
 
     client.archive_chat!(chat_id, archive: archive)
@@ -142,6 +152,14 @@ class Whatsapp::Providers::QuepasaService < Whatsapp::Providers::BaseService
     normalize_settings(info['server'] || info)
   end
 
+  def automation_settings
+    normalize_automation_settings(provider_config['automation_settings'] || {})
+  end
+
+  def automation_enabled?(key)
+    ActiveModel::Type::Boolean.new.cast(automation_settings[key.to_s])
+  end
+
   def update_settings!(settings_params)
     merged = settings.merge(settings_params.slice(*QUEPASA_BOOLEAN_FIELDS.map(&:to_s)).transform_values { |value| ActiveModel::Type::Boolean.new.cast(value) })
     client.update_settings!(to_quepasa_settings(merged))
@@ -149,6 +167,13 @@ class Whatsapp::Providers::QuepasaService < Whatsapp::Providers::BaseService
     provider_config['settings'] = merged
     whatsapp_channel.update!(provider_config: provider_config)
     whatsapp_channel.reauthorized!
+    merged
+  end
+
+  def update_automation_settings!(settings_params)
+    merged = automation_settings.merge(settings_params.slice(*AUTOMATION_BOOLEAN_FIELDS.map(&:to_s)).transform_values { |value| ActiveModel::Type::Boolean.new.cast(value) })
+    provider_config['automation_settings'] = merged
+    whatsapp_channel.update!(provider_config: provider_config)
     merged
   end
 
@@ -201,6 +226,13 @@ class Whatsapp::Providers::QuepasaService < Whatsapp::Providers::BaseService
         default = stored.key?(field.to_s) ? stored[field.to_s] : DEFAULT_SETTINGS[field]
         ActiveModel::Type::Boolean.new.cast(default)
       end
+    end.stringify_keys
+  end
+
+  def normalize_automation_settings(values)
+    AUTOMATION_BOOLEAN_FIELDS.index_with do |field|
+      raw = values.key?(field.to_s) ? values[field.to_s] : DEFAULT_AUTOMATION_SETTINGS[field]
+      ActiveModel::Type::Boolean.new.cast(raw)
     end.stringify_keys
   end
 

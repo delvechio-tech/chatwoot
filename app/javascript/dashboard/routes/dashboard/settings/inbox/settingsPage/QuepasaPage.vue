@@ -15,6 +15,12 @@ const FIELD_CONFIG = [
   ['readupdate', 'Marcar como lida ao receber', 'Atualizar leitura automaticamente'],
 ];
 
+const AUTOMATION_FIELD_CONFIG = [
+  ['typing_presence', 'Mostrar digitando', 'Exibir digitando no WhatsApp enquanto o agente escreve'],
+  ['read_sync', 'Sincronizar leitura', 'Marcar como lido ou não lido também no WhatsApp'],
+  ['archive_sync', 'Sincronizar arquivamento', 'Arquivar ao resolver e desarquivar ao reabrir'],
+];
+
 export default {
   components: {
     SettingsFieldSection,
@@ -33,6 +39,7 @@ export default {
       qrCode: '',
       running: true,
       settings: {},
+      automationSettings: {},
       connected: false,
       isLoading: false,
       isSaving: false,
@@ -41,6 +48,7 @@ export default {
       saveTimer: null,
       connectionTimer: null,
       fields: FIELD_CONFIG,
+      automationFields: AUTOMATION_FIELD_CONFIG,
     };
   },
   mounted() {
@@ -55,6 +63,12 @@ export default {
       this.queueAutoSave();
     },
     settings: {
+      deep: true,
+      handler() {
+        this.queueAutoSave();
+      },
+    },
+    automationSettings: {
       deep: true,
       handler() {
         this.queueAutoSave();
@@ -118,6 +132,7 @@ export default {
         const response = await InboxesAPI.updateQuepasaSettings(this.inbox.id, {
           running: this.running,
           settings: this.settings,
+          automation_settings: this.automationSettings,
         });
         this.applyQuepasaState(response.data);
       } catch (error) {
@@ -133,6 +148,10 @@ export default {
       this.isHydrating = true;
       if (replaceSettings || data.settings) {
         this.settings = data.settings || this.settings || {};
+      }
+      if (replaceSettings || data.automation_settings) {
+        this.automationSettings =
+          data.automation_settings || this.automationSettings || {};
       }
       this.updateConnectionState(data);
       this.running =
@@ -258,6 +277,21 @@ export default {
         :header="label"
         :description="description"
       />
+
+      <SettingsFieldSection
+        label="Automações do Chatwoot"
+        help-text="Controle como as ações feitas no atendimento refletem no WhatsApp."
+      >
+        <div class="space-y-4">
+          <SettingsToggleSection
+            v-for="[key, label, description] in automationFields"
+            :key="key"
+            v-model="automationSettings[key]"
+            :header="label"
+            :description="description"
+          />
+        </div>
+      </SettingsFieldSection>
 
       <div class="flex justify-end min-h-5">
         <span v-if="isSaving" class="text-sm text-n-slate-11">
