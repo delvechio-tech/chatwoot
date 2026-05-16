@@ -1,5 +1,5 @@
 class Webhooks::QuepasaEventsJob < ApplicationJob
-  queue_as :low
+  queue_as :high
 
   def perform(inbox_id, params = {})
     inbox = Inbox.find_by(id: inbox_id)

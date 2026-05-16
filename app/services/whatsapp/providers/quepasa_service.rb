@@ -13,7 +13,7 @@ class Whatsapp::Providers::QuepasaService < Whatsapp::Providers::BaseService
   }.freeze
   DEFAULT_AUTOMATION_SETTINGS = {
     typing_presence: true,
-    read_sync: true,
+    read_sync: false,
     archive_sync: true
   }.freeze
 

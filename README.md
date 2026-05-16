@@ -89,6 +89,10 @@ Publish help articles, FAQs, and guides through the built-in Help Center Portal.
 
 Detailed documentation is available at [chatwoot.com/help-center](https://www.chatwoot.com/help-center).
 
+## Native Quepasa WhatsApp provider
+
+This fork adds a native Quepasa provider for WhatsApp inboxes. For production deployment guidance, required environment variables, and post-deploy validation, see [`deployment/quepasa-native-installation.md`](./deployment/quepasa-native-installation.md).
+
 ## Translation process
 
 The translation process for Chatwoot web and mobile app is managed at [https://translate.chatwoot.com](https://translate.chatwoot.com) using Crowdin. Please read the [translation guide](https://www.chatwoot.com/docs/contributing/translating-chatwoot-to-your-language) for contributing to Chatwoot.

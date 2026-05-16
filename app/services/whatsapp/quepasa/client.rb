@@ -5,7 +5,7 @@ class Whatsapp::Quepasa::Client
   attr_reader :base_url
 
   def initialize(token:, user: nil, password: nil)
-    @base_url = ENV.fetch('QUEPASA_API_URL', ENV.fetch('QUEPASA_BASE_URL', 'https://wa.delvechio.tech')).delete_suffix('/')
+    @base_url = ENV.fetch('QUEPASA_API_URL') { ENV.fetch('QUEPASA_BASE_URL') }.delete_suffix('/')
     @token = token
     @master_key = ENV.fetch('QUEPASA_MASTER_KEY', nil).presence
     @user = user.presence || ENV.fetch('QUEPASA_USER', ENV.fetch('QUEPASA_USERNAME', ENV.fetch('QUEPASA_DEFAULT_USER', nil))).presence
