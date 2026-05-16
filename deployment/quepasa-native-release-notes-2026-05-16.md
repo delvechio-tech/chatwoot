@@ -31,13 +31,13 @@ Make the native Quepasa integration reliable for:
 
 ## Published image
 
-- Immutable tag: `delvechiotech/chatwoot-quepasa:1.0.0-native2`
+- Immutable tag: `delvechiotech/chatwoot-quepasa:1.0.0`
 - Digest: `sha256:f894723e969d10e6126838fed0f8c65ecac1a13b9e899e98232524c867db0a78`
 - `latest` was updated to the same digest after runtime validation.
 
 ## Live Delvechio deployment
 
-- Updated `chatwoot_app` and `chatwoot_sidekiq` to `1.0.0-native2`
+- Updated `chatwoot_app` and `chatwoot_sidekiq` to `1.0.0`
 - Increased Sidekiq resources to:
   - `cpus: "2"`
   - `memory: 2048M`
