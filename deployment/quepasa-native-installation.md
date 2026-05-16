@@ -7,6 +7,16 @@ Este fork inclui um provedor nativo de WhatsApp via Quepasa. Para que a instala�
 
 e mantenha os pontos abaixo.
 
+## Versões homologadas
+
+| Componente | Versão homologada |
+| --- | --- |
+| Chatwoot nativo Quepasa | `delvechiotech/chatwoot-quepasa:1.0.0` |
+| Quepasa | `v3.26.0427.1756` |
+| Imagem Quepasa homologada | `codeleaks/quepasa:latest@sha256:f156fc4fc774600be19cec4cc3d9c7c36a50d7968f5670e12cc82378e056382d` |
+
+Essa é a combinação validada em produção para o conector nativo. **Não use `codeleaks/quepasa:latest` sem digest**: a tag `latest` pode mudar no futuro e trazer diferenças de interface, migração ou comportamento que ainda não foram homologadas com este fork.
+
 ## Requisitos obrigatórios
 
 - `QUEPASA_API_URL`
@@ -23,7 +33,7 @@ e mantenha os pontos abaixo.
 - Eventos recebidos do Quepasa são processados na fila `high`, para que mensagens de WhatsApp não aguardem atrás de tarefas de baixa prioridade.
 - `read_sync` fica desativado por padrão. Algumas sessões do WhatsApp podem responder com conflitos de estado ao marcar mensagens como lidas automaticamente; ative esse recurso apenas depois de validar o comportamento da sua conta.
 - Não monte `/app/public` como volume. Esse caminho contém assets gerados pela imagem; sobrescrevê-lo com um volume antigo pode esconder a interface nativa do Quepasa.
-- Use uma versão pinada e testada do Quepasa. O exemplo oficial usa o digest compatível validado com este fork, em vez de depender de `latest` puro.
+- Use a versão homologada do Quepasa `v3.26.0427.1756`, fixada pelo digest informado acima. O exemplo oficial já traz esse digest compatível, em vez de depender de `latest` puro.
 - Para produção, mantenha o Sidekiq com folga de recurso suficiente. A stack de exemplo recomenda `2 CPU / 2048 MB` para o worker.
 
 ## Checklist pós-deploy
@@ -54,3 +64,7 @@ Esse erro costuma indicar banco antigo/incompatível do Quepasa. Em uma instala�
 ### Mensagens demoram a aparecer no Chatwoot
 
 Confirme que a imagem em uso contém este fork atualizado. Neste projeto, os eventos do Quepasa rodam na fila `high`; versões antigas processavam esses eventos na fila `low`, o que podia gerar atraso e mensagens fora de ritmo.
+
+### O Quepasa abriu, mas os botões/toggles não refletem como no ambiente homologado
+
+Confirme primeiro a versão carregada na interface do Quepasa. Para este fork, a versão homologada é **`v3.26.0427.1756`**. Se a tela mostrar outra versão, alinhe a stack ao digest homologado antes de investigar o Chatwoot.

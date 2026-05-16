@@ -91,7 +91,19 @@ Detailed documentation is available at [chatwoot.com/help-center](https://www.ch
 
 ## Native Quepasa WhatsApp provider
 
-This fork adds a native Quepasa provider for WhatsApp inboxes. For production deployment guidance, required environment variables, and post-deploy validation, see [`deployment/quepasa-native-installation.md`](./deployment/quepasa-native-installation.md).
+This fork adds a native Quepasa provider for WhatsApp inboxes.
+
+### Supported production pair
+
+| Component | Supported version |
+| --- | --- |
+| Chatwoot image | `delvechiotech/chatwoot-quepasa:1.0.0` |
+| Quepasa | `v3.26.0427.1756` |
+| Quepasa image | `codeleaks/quepasa:latest@sha256:f156fc4fc774600be19cec4cc3d9c7c36a50d7968f5670e12cc82378e056382d` |
+
+Use the tested Quepasa digest above instead of a floating `latest` tag. This is the validated production combination for the native connector.
+
+For deployment guidance, required environment variables, and post-deploy validation, see [`deployment/quepasa-native-installation.md`](./deployment/quepasa-native-installation.md).
 
 ## Translation process
 
