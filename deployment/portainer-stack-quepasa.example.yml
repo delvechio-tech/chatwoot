@@ -2,7 +2,7 @@ version: "3.7"
 
 # Chatwoot + Quepasa stack example for Portainer/Swarm.
 # Validated pair:
-#   Chatwoot: delvechiotech/chatwoot-quepasa:1.0.0
+#   Chatwoot: delvechiotech/chatwoot:1.0.0
 #   Quepasa:  v3.26.0427.1756
 # Replace every CHANGE_ME value before deploying.
 # Required external resources:
@@ -50,7 +50,7 @@ services:
           memory: 1024M
 
   chatwoot_app:
-    image: delvechiotech/chatwoot-quepasa:1.0.0
+    image: delvechiotech/chatwoot:1.0.0
     entrypoint: docker/entrypoints/rails.sh
     command: >
       sh -c "echo 'Rails.application.config.active_storage.variant_processor = :mini_magick' > /app/config/initializers/active_storage.rb &&
@@ -122,7 +122,7 @@ services:
           memory: 1024M
 
   chatwoot_sidekiq:
-    image: delvechiotech/chatwoot-quepasa:1.0.0
+    image: delvechiotech/chatwoot:1.0.0
     command: bundle exec sidekiq -C config/sidekiq.yml
     volumes:
       - chatwoot_storage:/app/storage

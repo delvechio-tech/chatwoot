@@ -4,7 +4,7 @@
 
 | Componente | Versão |
 | --- | --- |
-| Chatwoot | `delvechiotech/chatwoot-quepasa:1.0.0` |
+| Chatwoot | `delvechiotech/chatwoot:1.0.0` |
 | Quepasa | `v3.26.0427.1756` |
 | Imagem Quepasa validada | `codeleaks/quepasa:latest@sha256:f156fc4fc774600be19cec4cc3d9c7c36a50d7968f5670e12cc82378e056382d` |
 
@@ -21,7 +21,7 @@
 
 ## Regras de instalação
 
-1. Use `delvechiotech/chatwoot-quepasa:1.0.0`.
+1. Use `delvechiotech/chatwoot:1.0.0`.
 2. Use o Quepasa homologado `v3.26.0427.1756`.
 3. Não use `codeleaks/quepasa:latest` sem digest em produção.
 4. Não monte `/app/public` no Chatwoot.

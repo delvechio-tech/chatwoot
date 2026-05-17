@@ -4,7 +4,7 @@
 
 Make the native Quepasa integration reliable for:
 
-- new self-hosted installs using `delvechiotech/chatwoot-quepasa`
+- new self-hosted installs using `delvechiotech/chatwoot`
 - the live `chat.delvechio.tech` environment
 
 ## Root causes found
@@ -31,7 +31,7 @@ Make the native Quepasa integration reliable for:
 
 ## Published image
 
-- Immutable tag: `delvechiotech/chatwoot-quepasa:1.0.0`
+- Immutable tag: `delvechiotech/chatwoot:1.0.0`
 - Digest: `sha256:f894723e969d10e6126838fed0f8c65ecac1a13b9e899e98232524c867db0a78`
 - `latest` was updated to the same digest after runtime validation.
 

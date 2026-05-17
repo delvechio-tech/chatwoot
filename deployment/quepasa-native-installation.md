@@ -11,7 +11,7 @@ e mantenha os pontos abaixo.
 
 | Componente | Versão homologada |
 | --- | --- |
-| Chatwoot nativo Quepasa | `delvechiotech/chatwoot-quepasa:1.0.0` |
+| Chatwoot nativo Quepasa | `delvechiotech/chatwoot:1.0.0` |
 | Quepasa | `v3.26.0427.1756` |
 | Imagem Quepasa homologada | `codeleaks/quepasa:latest@sha256:f156fc4fc774600be19cec4cc3d9c7c36a50d7968f5670e12cc82378e056382d` |
 
