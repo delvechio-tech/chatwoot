@@ -40,6 +40,17 @@ describe('composeConversationHelper', () => {
       ).toBe('John Doe (+1234567890)');
     });
 
+    it('hides the technical phone number for quepasa inboxes', () => {
+      expect(
+        helpers.generateLabelForContactableInboxesList({
+          ...contact,
+          channelType: INBOX_TYPES.WHATSAPP,
+          phoneNumber: 'quepasa:3bbfae34-5418-4237-8a76-55d39fa4a928',
+          provider: 'quepasa',
+        })
+      ).toBe('John Doe');
+    });
+
     it('generates label for other inbox types', () => {
       expect(
         helpers.generateLabelForContactableInboxesList({

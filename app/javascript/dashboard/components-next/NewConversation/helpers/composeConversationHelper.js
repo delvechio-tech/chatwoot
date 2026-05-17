@@ -17,9 +17,16 @@ export const generateLabelForContactableInboxesList = ({
   email,
   channelType,
   phoneNumber,
+  provider,
 }) => {
   if (channelType === INBOX_TYPES.EMAIL) {
     return `${name} (${email})`;
+  }
+  if (
+    channelType === INBOX_TYPES.WHATSAPP &&
+    (provider === 'quepasa' || phoneNumber?.startsWith('quepasa:'))
+  ) {
+    return name;
   }
   if (
     channelType === INBOX_TYPES.TWILIO ||
@@ -46,6 +53,7 @@ const transformInbox = ({
     email,
     channelType,
     phoneNumber,
+    provider: rest.provider,
   }),
   action: 'inbox',
   value: id,
