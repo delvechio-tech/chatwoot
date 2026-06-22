@@ -39,7 +39,7 @@ class Whatsapp::Providers::QuepasaService < Whatsapp::Providers::BaseService
   end
 
   def validate_provider_config?
-    provider_config['token'].present?
+    provider_config['token'].present? && ENV['QUEPASA_API_URL'].present?
   end
 
   def api_headers

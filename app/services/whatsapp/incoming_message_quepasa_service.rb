@@ -434,7 +434,7 @@ class Whatsapp::IncomingMessageQuepasaService
       @payload[:from_participant], @payload[:fromParticipant]
     )
     phone = pick_string(@payload[:participantphone], @payload[:ParticipantPhone], @payload[:participant_phone], participant_obj[:phone], participant_obj[:Phone]).gsub(/\D/, '')
-    phone = jid.split('@').first.gsub(/\D/, '') if phone.blank? && jid.present? && !jid.include?('@lid')
+    phone = jid.split('@').first&.gsub(/\D/, '') if phone.blank? && jid.present? && !jid.include?('@lid')
     push_name = pick_name(@payload[:pushname], @payload[:PushName], @payload[:pushName], @payload[:notify], @payload[:Notify], participant_obj)
     return if jid.blank? && phone.blank? && push_name.blank?
 

@@ -87,11 +87,14 @@ class Whatsapp::Quepasa::Client
   end
 
   def delete_webhook!(url)
-    HTTParty.delete("#{base_url}/webhook", headers: bot_headers, body: { url: url }.to_json)
+    response = HTTParty.delete("#{base_url}/webhook", headers: bot_headers, body: { url: url }.to_json)
+    Rails.logger.warn "Quepasa webhook deletion failed [#{response.code}]: #{response.body}" unless response.success?
+    response
   end
 
   def update_settings!(settings)
-    HTTParty.patch("#{base_url}/info", headers: bot_headers, body: { settings: settings }.to_json)
+    patch_response = HTTParty.patch("#{base_url}/info", headers: bot_headers, body: { settings: settings }.to_json)
+    Rails.logger.warn "Quepasa settings PATCH failed [#{patch_response.code}]: #{patch_response.body}" unless patch_response.success?
     response = post_info(settings, bot_headers)
     raise "Quepasa settings update failed [#{response.code}]: #{response.body}" unless response.success?
 
