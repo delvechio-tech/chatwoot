@@ -7,16 +7,16 @@ class VersionDelvechioBrandAssetUrls < ActiveRecord::Migration[7.1]
 
   def up
     BRAND_ASSET_URLS.each do |name, asset_url|
-      config = InstallationConfig.find_by(name: name, value: asset_url)
-      config&.update!(value: versioned(asset_url))
+      config = InstallationConfig.find_by(name: name)
+      config&.update!(value: versioned(asset_url)) if config&.value == asset_url
     end
     GlobalConfig.clear_cache
   end
 
   def down
     BRAND_ASSET_URLS.each do |name, asset_url|
-      config = InstallationConfig.find_by(name: name, value: versioned(asset_url))
-      config&.update!(value: asset_url)
+      config = InstallationConfig.find_by(name: name)
+      config&.update!(value: asset_url) if config&.value == versioned(asset_url)
     end
     GlobalConfig.clear_cache
   end
