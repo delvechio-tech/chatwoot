@@ -2,11 +2,11 @@
 - name: INSTALLATION_NAME
   value: 'Delvechio Tech'
 - name: LOGO_THUMBNAIL
-  value: '/brand-assets/logo_thumbnail.svg'
+  value: '/brand-assets/logo_thumbnail.svg?v=1.1'
 - name: LOGO
-  value: '/brand-assets/logo.svg'
+  value: '/brand-assets/logo.svg?v=1.1'
 - name: LOGO_DARK
-  value: '/brand-assets/logo_dark.svg'
+  value: '/brand-assets/logo_dark.svg?v=1.1'
 - name: BRAND_URL
   value: 'https://delvechio.tech'
 - name: WIDGET_BRAND_URL
