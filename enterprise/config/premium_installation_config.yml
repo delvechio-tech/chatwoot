@@ -2,11 +2,11 @@
 - name: INSTALLATION_NAME
   value: 'Delvechio Tech'
 - name: LOGO_THUMBNAIL
-  value: '/brand-assets/logo_thumbnail.svg?v=1.1'
+  value: '/brand-assets/logo_thumbnail.png?v=2.0'
 - name: LOGO
-  value: '/brand-assets/logo.svg?v=1.1'
+  value: '/brand-assets/logo.png?v=2.0'
 - name: LOGO_DARK
-  value: '/brand-assets/logo_dark.svg?v=1.1'
+  value: '/brand-assets/logo_dark.png?v=2.0'
 - name: BRAND_URL
   value: 'https://delvechio.tech'
 - name: WIDGET_BRAND_URL
@@ -18,5 +18,5 @@
 - name: PRIVACY_URL
   value: 'https://www.chatwoot.com/privacy-policy'
 - name: DISPLAY_MANIFEST
-  value: true
+  value: false
 # ------- End of Branding Related Config ------- #
