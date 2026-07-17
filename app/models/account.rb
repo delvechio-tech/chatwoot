@@ -150,12 +150,6 @@ class Account < ApplicationRecord
   after_create_commit :notify_creation
   after_destroy :remove_account_sequences
 
-  before_save :ensure_enterprise_plan
-
-  def ensure_enterprise_plan
-  self.custom_attributes = (self.custom_attributes || {}).merge('plan_name' => 'enterprise')
-  end
-
   def agents
     users.where(account_users: { role: :agent })
   end
