@@ -15,11 +15,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
       - name: Run Rubocop
-        run: bundle exec rubocop --parallel
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            mapfile -t ruby_files < <(
+              git diff --name-only --diff-filter=ACMR \
+                "${{ github.event.pull_request.base.sha }}" \
+                "${{ github.sha }}" -- '*.rb'
+            )
+
+            if (( ${#ruby_files[@]} > 0 )); then
+              bundle exec rubocop --parallel "${ruby_files[@]}"
+            fi
+          else
+            bundle exec rubocop --parallel
+          fi
 
   lint-frontend:
     runs-on: ubuntu-latest
