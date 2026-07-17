@@ -12,13 +12,29 @@ const FIELD_CONFIG = [
   ['direct', 'Mensagens diretas', 'Conversas individuais'],
   ['calls', 'Chamadas', 'Receber eventos de chamada'],
   ['readreceipts', 'Confirmações de leitura', 'Receber eventos de leitura'],
-  ['readupdate', 'Marcar como lida ao receber', 'Atualizar leitura automaticamente'],
+  [
+    'readupdate',
+    'Marcar como lida ao receber',
+    'Atualizar leitura automaticamente',
+  ],
 ];
 
 const AUTOMATION_FIELD_CONFIG = [
-  ['typing_presence', 'Mostrar digitando', 'Exibir digitando no WhatsApp enquanto o agente escreve'],
-  ['read_sync', 'Sincronizar leitura', 'Marcar como lido ou não lido também no WhatsApp'],
-  ['archive_sync', 'Sincronizar arquivamento', 'Arquivar ao resolver e desarquivar ao reabrir'],
+  [
+    'typing_presence',
+    'Mostrar digitando',
+    'Exibir digitando no WhatsApp enquanto o agente escreve',
+  ],
+  [
+    'read_sync',
+    'Sincronizar leitura',
+    'Marcar como lido ou não lido também no WhatsApp',
+  ],
+  [
+    'archive_sync',
+    'Sincronizar arquivamento',
+    'Arquivar ao resolver e desarquivar ao reabrir',
+  ],
 ];
 
 export default {
@@ -51,13 +67,6 @@ export default {
       automationFields: AUTOMATION_FIELD_CONFIG,
     };
   },
-  mounted() {
-    this.fetchSettings();
-  },
-  beforeUnmount() {
-    this.stopConnectionPolling();
-    if (this.saveTimer) clearTimeout(this.saveTimer);
-  },
   watch: {
     running() {
       this.queueAutoSave();
@@ -74,6 +83,13 @@ export default {
         this.queueAutoSave();
       },
     },
+  },
+  mounted() {
+    this.fetchSettings();
+  },
+  beforeUnmount() {
+    this.stopConnectionPolling();
+    if (this.saveTimer) clearTimeout(this.saveTimer);
   },
   methods: {
     errorMessage(error, fallback) {
@@ -124,7 +140,10 @@ export default {
       if (this.isHydrating || this.isLoading) return;
 
       if (this.saveTimer) clearTimeout(this.saveTimer);
-      this.saveTimer = setTimeout(() => this.saveSettings({ silent: true }), 250);
+      this.saveTimer = setTimeout(
+        () => this.saveSettings({ silent: true }),
+        250
+      );
     },
     async saveSettings() {
       this.isSaving = true;
@@ -224,10 +243,10 @@ export default {
             <span class="i-lucide-circle-check size-5 text-n-teal-10" />
             <div>
               <p class="text-sm font-medium text-n-slate-12">
-                Conectado com sucesso
+                {{ $t('INBOX_MGMT.QUEPASA.SETTINGS.CONNECTED_TITLE') }}
               </p>
               <p class="text-sm text-n-slate-11">
-                A sessão está ativa para enviar e receber mensagens.
+                {{ $t('INBOX_MGMT.QUEPASA.SETTINGS.CONNECTED_DESCRIPTION') }}
               </p>
             </div>
           </div>
@@ -249,7 +268,7 @@ export default {
               class="w-64 h-64"
             />
             <span v-else class="text-sm text-n-slate-11">
-              Gere um QR Code para conectar
+              {{ $t('INBOX_MGMT.QUEPASA.SETTINGS.GENERATE_QR') }}
             </span>
           </div>
           <NextButton
@@ -288,7 +307,7 @@ export default {
 
       <div class="flex justify-end min-h-5">
         <span v-if="isSaving" class="text-sm text-n-slate-11">
-          Salvando configurações...
+          {{ $t('INBOX_MGMT.QUEPASA.SETTINGS.SAVING') }}
         </span>
       </div>
     </template>

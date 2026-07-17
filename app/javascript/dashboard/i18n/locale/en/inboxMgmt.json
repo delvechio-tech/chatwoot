@@ -1132,6 +1132,20 @@
         "DESCRIPTION": "Connect with Other Providers"
       }
     },
+    "QUEPASA": {
+      "CREATE": {
+        "INBOX_NAME": "Inbox name",
+        "PLACEHOLDER": "WhatsApp sales",
+        "INBOX_NAME_ERROR": "Enter an inbox name",
+        "DESCRIPTION": "Finish creating the inbox, then connect your number in the settings."
+      },
+      "SETTINGS": {
+        "CONNECTED_TITLE": "Connected successfully",
+        "CONNECTED_DESCRIPTION": "The session is active and ready to send and receive messages.",
+        "GENERATE_QR": "Generate a QR code to connect",
+        "SAVING": "Saving settings..."
+      }
+    },
     "CHANNELS": {
       "MESSENGER": "Messenger",
       "WEB_WIDGET": "Website",

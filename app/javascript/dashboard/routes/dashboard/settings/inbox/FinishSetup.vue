@@ -236,7 +236,9 @@ onMounted(() => {
           :inbox-id="$route.params.inbox_id"
         />
         <div
-          v-if="isAWhatsAppChannel && !isQuepasaWhatsAppChannel && qrCodes.whatsapp"
+          v-if="
+            isAWhatsAppChannel && !isQuepasaWhatsAppChannel && qrCodes.whatsapp
+          "
           class="flex flex-col gap-3 items-center mt-8"
         >
           <p class="mt-2 text-sm text-n-slate-9">

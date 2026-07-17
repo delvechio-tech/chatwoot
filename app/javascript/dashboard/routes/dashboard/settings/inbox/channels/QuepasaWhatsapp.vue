@@ -45,7 +45,9 @@ export default {
           },
         });
       } catch (error) {
-        useAlert(error.message || 'Não foi possível criar a caixa WhatsApp API');
+        useAlert(
+          error.message || 'Não foi possível criar a caixa WhatsApp API'
+        );
       }
     },
   },
@@ -56,21 +58,21 @@ export default {
   <form class="flex flex-wrap flex-col mx-0" @submit.prevent="createChannel">
     <div class="flex-shrink-0 flex-grow-0">
       <label :class="{ error: v$.inboxName.$error }">
-        Nome da caixa de entrada
+        {{ $t('INBOX_MGMT.QUEPASA.CREATE.INBOX_NAME') }}
         <input
           v-model="inboxName"
           type="text"
-          placeholder="Vendas WhatsApp"
+          :placeholder="$t('INBOX_MGMT.QUEPASA.CREATE.PLACEHOLDER')"
           @blur="v$.inboxName.$touch"
         />
         <span v-if="v$.inboxName.$error" class="message">
-          Informe um nome para a caixa de entrada
+          {{ $t('INBOX_MGMT.QUEPASA.CREATE.INBOX_NAME_ERROR') }}
         </span>
       </label>
     </div>
 
     <p class="max-w-xl mb-4 text-sm leading-relaxed text-n-slate-11">
-      Finalize a criação da caixa e conecte seu número nas configurações.
+      {{ $t('INBOX_MGMT.QUEPASA.CREATE.DESCRIPTION') }}
     </p>
 
     <div class="w-full mt-4">
