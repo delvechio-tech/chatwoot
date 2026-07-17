@@ -31,7 +31,7 @@ jobs:
             )
 
             if (( ${#ruby_files[@]} > 0 )); then
-              bundle exec rubocop --parallel "${ruby_files[@]}"
+              bundle exec rubocop --parallel --force-exclusion "${ruby_files[@]}"
             fi
           else
             bundle exec rubocop --parallel
