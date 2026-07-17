@@ -9,6 +9,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: run-foss-spec-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # Separate linting jobs for faster feedback
   lint-backend:
