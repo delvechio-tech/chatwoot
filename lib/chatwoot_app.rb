@@ -12,7 +12,7 @@ module ChatwootApp
   end
 
   def self.enterprise?
-    true
+    root.join('enterprise').exist?
   end
 
   def self.chatwoot_cloud?
@@ -20,7 +20,7 @@ module ChatwootApp
   end
 
   def self.self_hosted_enterprise?
-    true
+    enterprise? && !chatwoot_cloud?
   end
 
   def self.custom?

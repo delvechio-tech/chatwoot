@@ -1,4 +1,8 @@
 module Enterprise::Account
+  def self.prepended(base)
+    base.before_save :ensure_enterprise_plan
+  end
+
   # TODO: Remove this when we upgrade administrate gem to the latest version
   # this is a temporary method since current administrate doesn't support virtual attributes
   def manually_managed_features; end
@@ -39,6 +43,10 @@ module Enterprise::Account
   end
 
   private
+
+  def ensure_enterprise_plan
+    self.custom_attributes = (custom_attributes || {}).merge('plan_name' => 'enterprise')
+  end
 
   def sync_assignment_features
     if feature_enabled?('assignment_v2')
